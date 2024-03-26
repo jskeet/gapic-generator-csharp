@@ -18,9 +18,11 @@ using Google.Api.Generator.ProtoUtils;
 using Google.Api.Generator.Utils;
 using Google.Cloud;
 using Google.LongRunning;
+using Google.Protobuf.Collections;
 using Google.Protobuf.Reflection;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using Grpc.Net.Client.Configuration;
 using Grpc.ServiceConfig;
 using System;
 using System.Collections.Generic;
@@ -511,44 +513,63 @@ namespace Google.Api.Generator.Generation
             var http = desc.GetExtension(AnnotationsExtensions.Http);
             var routing = desc.GetExtension(RoutingExtensions.Routing);
             RoutingHeaders = ReadRoutingHeaders(routing, http, desc.InputType).ToList();
+            ServiceConfigMethodSettings = svc.ServiceConfig?.Publishing?.MethodSettings?.FirstOrDefault(m => m.Selector == desc.FullName)
+                ?? new MethodSettings();
             (MethodRetry, MethodRetryStatusCodes, Expiration) = LoadTiming(svc, desc);
             // The method is considered deprecated if the RPC, request or response messages are deprecated.
             // In reality, it would be very odd to deprecate the messages without deprecating the RPC, but this makes it consistent.
             IsDeprecated = desc.IsDeprecated() || RequestMessageDesc.IsDeprecated() || ResponseMessageDesc.IsDeprecated();
-            ServiceConfigMethodSettings = svc.ServiceConfig?.Publishing?.MethodSettings?.FirstOrDefault(m => m.Selector == desc.FullName)
-                ?? new MethodSettings();
         }
 
         private (RetrySettings, IEnumerable<StatusCode>, Expiration) LoadTiming(ServiceDetails svc, MethodDescriptor desc)
         {
-            var config = svc.MethodGrpcConfigsByName.GetValueOrDefault($"{svc.ServiceFullName}/{desc.Name}") ??
-                svc.MethodGrpcConfigsByName.GetValueOrDefault($"{svc.ServiceFullName}/");
-            if (config == null)
+            var jsonTiming = SynthesizeMethodTimingFromGrpcServiceConfig();
+            MethodTiming methodSettingsTiming = null; // TODO: ServiceConfigMethodSettings?.Timing
+
+            if (jsonTiming is not null && methodSettingsTiming is not null && !jsonTiming.Equals(methodSettingsTiming))
+            {
+                throw new InvalidOperationException($"Conflicting retry policies for {Descriptor.FullName}");
+            }
+
+            var timing = jsonTiming ?? methodSettingsTiming;
+            if (timing is null)
             {
                 return default;
             }
-            RetrySettings retry;
-            IReadOnlyList<StatusCode> statusCodes;
-            if (config.RetryOrHedgingPolicyCase == MethodConfig.RetryOrHedgingPolicyOneofCase.RetryPolicy)
+
+            // `retry` is the delay duration between calls.
+            // float -> double conversion via string to avoid unpleasent results from unrepresentable floats (e.g. 1.3 -> 1.2999999523162842)
+            var multiplier = double.Parse(timing.BackoffMultiplier.ToString());
+            // gRPC uses maxAttempts = 0 to mean unlimited; GAX wants a positive number. int.MaxValue is fine.
+            int maxAttempts = timing.MaxAttempts == 0 ? int.MaxValue : (int) timing.MaxAttempts;
+            // The retry filter here is irrelevant. We'll generate code with the right status codes later.
+            var gaxRetry = RetrySettings.FromExponentialBackoff(maxAttempts, timing.InitialBackoff.ToTimeSpan(), timing.MaxBackoff.ToTimeSpan(), multiplier, error => false);
+            // `Google.Rpc.Code` and `Grpc.Core.StatusCode` enums are identically defined.
+            var statusCodes = timing.RetryableStatusCodes.Select(x => (StatusCode)x).ToList();
+            var expiration = timing.Timeout is null ? null : Expiration.FromTimeout(timing.Timeout.ToTimeSpan());
+            return (gaxRetry, statusCodes, expiration);
+
+            MethodTiming SynthesizeMethodTimingFromGrpcServiceConfig()
             {
-                var rp = config.RetryPolicy;
-                // `retry` is the delay duration between calls.
-                // float -> double conversion via string to avoid unpleasent results from unrepresentable floats (e.g. 1.3 -> 1.2999999523162842)
-                var multiplier = double.Parse(rp.BackoffMultiplier.ToString());
-                // gRPC uses maxAttempts = 0 to mean unlimited; GAX wants a positive number. int.MaxValue is fine.
-                int maxAttempts = rp.MaxAttempts == 0 ? int.MaxValue : (int) rp.MaxAttempts;
-                // The retry filter here is irrelevant. We'll generate code with the right status codes later.
-                retry = RetrySettings.FromExponentialBackoff(maxAttempts, rp.InitialBackoff.ToTimeSpan(), rp.MaxBackoff.ToTimeSpan(), multiplier, error => false);
-                // `Google.Rpc.Code` and `Grpc.Core.StatusCode` enums are identically defined.
-                statusCodes = rp.RetryableStatusCodes.Select(x => (StatusCode) x).ToList();
+                var methodConfig = svc.MethodGrpcConfigsByName.GetValueOrDefault($"{svc.ServiceFullName}/{desc.Name}") ??
+                    svc.MethodGrpcConfigsByName.GetValueOrDefault($"{svc.ServiceFullName}/");
+                if (methodConfig is null)
+                {
+                    return null;
+                }
+                var retryPolicy = methodConfig.RetryOrHedgingPolicyCase == Grpc.ServiceConfig.MethodConfig.RetryOrHedgingPolicyOneofCase.RetryPolicy
+                    ? methodConfig.RetryPolicy
+                    : null;
+                return new MethodTiming
+                {
+                    Timeout = methodConfig.Timeout,
+                    MaxAttempts = retryPolicy?.MaxAttempts ?? 0,
+                    InitialBackoff = retryPolicy?.InitialBackoff,
+                    MaxBackoff = retryPolicy?.MaxBackoff,
+                    BackoffMultiplier = retryPolicy?.BackoffMultiplier ?? 0f,
+                    RetryableStatusCodes = { retryPolicy?.RetryableStatusCodes ?? Enumerable.Empty<Google.Rpc.Code>() }
+                };
             }
-            else
-            {
-                retry = null;
-                statusCodes = ImmutableList<StatusCode>.Empty;
-            }
-            var expiration = config.Timeout is null ? null : Expiration.FromTimeout(config.Timeout.ToTimeSpan());
-            return (retry, statusCodes, expiration);
         }
 
         private IEnumerable<RoutingHeader> ReadRoutingHeaders(RoutingRule routingRule, HttpRule http,
@@ -766,5 +787,16 @@ namespace Google.Api.Generator.Generation
         /// This is never null.
         /// </summary>
         public MethodSettings ServiceConfigMethodSettings { get; }
+
+        // This would actually be part of client.proto.
+        private class MethodTiming
+        {
+            public Duration Timeout { get; set; }
+            public uint MaxAttempts { get; set; }
+            public Duration InitialBackoff { get; set; }
+            public Duration MaxBackoff { get; set; }
+            public float BackoffMultiplier { get; set; }
+            public RepeatedField<Google.Rpc.Code> RetryableStatusCodes { get; set; }
+        }
     }
 }
