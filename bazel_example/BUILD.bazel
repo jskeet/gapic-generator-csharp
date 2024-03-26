@@ -56,7 +56,6 @@ csharp_gapic_library(
         ":example_csharp_proto",
         ":example_csharp_grpc",
     ],
-    grpc_service_config = "grpc_service_config.json",
     # common_resources_config = "common_resources_config.json",
     service_yaml = "example.yaml"
 )

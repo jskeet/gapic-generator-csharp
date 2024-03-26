@@ -38,7 +38,6 @@ def csharp_gapic_library(
         name,
         srcs,
         deps,
-        grpc_service_config = None,
         common_resources_config = None,
         service_yaml = None,
         rest_numeric_enums = False,
@@ -49,8 +48,6 @@ def csharp_gapic_library(
     name_srcjar = "{name}_srcjar".format(name = name)
     opt_file_args = {}
     opt_args = []
-    if grpc_service_config:
-        opt_file_args[grpc_service_config] = "grpc-service-config"
     if common_resources_config:
         opt_file_args[common_resources_config] = "common-resources-config"
     if service_yaml:

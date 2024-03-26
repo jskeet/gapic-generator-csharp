@@ -30,7 +30,7 @@ namespace Google.Api.Generator.Tests
     public class ProtoTest
     {
         private IEnumerable<ResultFile> Run(IEnumerable<string> protoFilenames, string package,
-            string grpcServiceConfigPath, string serviceConfigPath, IEnumerable<string> commonResourcesConfigPaths, ApiTransports transports, bool requestNumericEnumJsonEncoding)
+            string serviceConfigPath, IEnumerable<string> commonResourcesConfigPaths, ApiTransports transports, bool requestNumericEnumJsonEncoding)
         {
             var clock = new FakeClock(new DateTime(2019, 1, 1));
             var protoPaths = protoFilenames.Select(x => Path.Combine(Invoker.GeneratorTestsDir, x));
@@ -49,7 +49,7 @@ namespace Google.Api.Generator.Tests
 
                 var descriptorBytes = File.ReadAllBytes(desc.Path);
                 FileDescriptorSet descriptorSet = FileDescriptorSet.Parser.ParseFrom(descriptorBytes);
-                return CodeGenerator.Generate(descriptorSet, package, clock, grpcServiceConfigPath, serviceConfigPath, commonResourcesConfigPaths, transports, requestNumericEnumJsonEncoding);
+                return CodeGenerator.Generate(descriptorSet, package, clock, serviceConfigPath, commonResourcesConfigPaths, transports, requestNumericEnumJsonEncoding);
             }
         }
 
@@ -58,12 +58,12 @@ namespace Google.Api.Generator.Tests
         {
             // Test that protoc executes successfully,
             // and the generator processes the descriptors without crashing!
-            Run(new[] { "ProtoTest.proto" }, "testing", null, null, null, ApiTransports.Grpc, requestNumericEnumJsonEncoding: false);
+            Run(new[] { "ProtoTest.proto" }, "testing",  null, null, ApiTransports.Grpc, requestNumericEnumJsonEncoding: false);
         }
 
         private void ProtoTestSingle(string testProtoName,
             bool ignoreCsProj = false, bool ignoreSnippets = false,
-            string grpcServiceConfigPath = null, string serviceConfigPath = null, IEnumerable<string> commonResourcesConfigPaths = null,
+            string serviceConfigPath = null, IEnumerable<string> commonResourcesConfigPaths = null,
             ApiTransports transports = ApiTransports.Grpc, bool requestNumericEnumJsonEncoding = false,
             bool ignoreGapicMetadataFile = true, bool ignoreApiMetadataFile = true, bool ignoreServiceExtensionsFile = true) =>
             ProtoTestSingle(
@@ -74,7 +74,6 @@ namespace Google.Api.Generator.Tests
                 package: null,
                 ignoreCsProj,
                 ignoreSnippets,
-                grpcServiceConfigPath,
                 serviceConfigPath,
                 commonResourcesConfigPaths,
                 transports,
@@ -86,7 +85,7 @@ namespace Google.Api.Generator.Tests
 
         private void ProtoTestSingle(IEnumerable<string> testProtoNames, string sourceDir = null, string outputDir = null, string package = null,
             bool ignoreCsProj = false, bool ignoreSnippets = false,
-            string grpcServiceConfigPath = null, string serviceConfigPath = null, IEnumerable<string> commonResourcesConfigPaths = null,
+            string serviceConfigPath = null, IEnumerable<string> commonResourcesConfigPaths = null,
             ApiTransports transports = ApiTransports.Grpc, bool requestNumericEnumJsonEncoding = false,
             bool ignoreGapicMetadataFile = true, bool ignoreApiMetadataFile = true, bool ignoreServiceExtensionsFile = true)
         {
@@ -104,7 +103,7 @@ namespace Google.Api.Generator.Tests
             }
 
             var files = Run(protoPaths, package,
-                grpcServiceConfigPath, serviceConfigPath, commonResourcesConfigPaths, transports, requestNumericEnumJsonEncoding);
+                serviceConfigPath, commonResourcesConfigPaths, transports, requestNumericEnumJsonEncoding);
             // Check output is present.
             Assert.NotEmpty(files);
 
@@ -147,12 +146,11 @@ namespace Google.Api.Generator.Tests
         }
 
         private TException ProtoTestSingleFailure<TException>(string testProtoName,
-            string grpcServiceConfigPath = null, string serviceConfigPath = null, IEnumerable<string> commonResourcesConfigPaths = null,
+            string serviceConfigPath = null, IEnumerable<string> commonResourcesConfigPaths = null,
             ApiTransports transports = ApiTransports.Grpc, bool requestNumericEnumJsonEncoding = false)
             where TException : Exception =>
             ProtoTestSingleFailure<TException>(
                 new[] { testProtoName },
-                grpcServiceConfigPath,
                 serviceConfigPath,
                 commonResourcesConfigPaths,
                 transports,
@@ -160,7 +158,7 @@ namespace Google.Api.Generator.Tests
             );
 
         private TException ProtoTestSingleFailure<TException>(IEnumerable<string> testProtoNames,
-            string grpcServiceConfigPath = null, string serviceConfigPath = null, IEnumerable<string> commonResourcesConfigPaths = null,
+            string serviceConfigPath = null, IEnumerable<string> commonResourcesConfigPaths = null,
             ApiTransports transports = ApiTransports.Grpc, bool requestNumericEnumJsonEncoding = false)
             where TException : Exception
         {
@@ -173,7 +171,7 @@ namespace Google.Api.Generator.Tests
                 serviceConfigPath = Path.Combine(Invoker.GeneratorTestsDir, "ProtoTests", sourceDir, serviceConfigPath);
             }
             var exception = Assert.Throws<TException>(() => Run(protoPaths, package,
-                grpcServiceConfigPath, serviceConfigPath, commonResourcesConfigPaths, transports, requestNumericEnumJsonEncoding));
+                serviceConfigPath, commonResourcesConfigPaths, transports, requestNumericEnumJsonEncoding));
             return exception;
         }
 
@@ -265,10 +263,11 @@ namespace Google.Api.Generator.Tests
         [Fact]
         public void RoutingHeadersExplicit() => ProtoTestSingle("RoutingHeadersExplicit", ignoreCsProj: true, ignoreSnippets: true);
 
+        /* TODO: Reimplement with the full service config
         [Fact]
         public void GrpcServiceConfig() => ProtoTestSingle("GrpcServiceConfig", ignoreCsProj: true, ignoreSnippets: true,
                 grpcServiceConfigPath: Path.Combine(Invoker.GeneratorTestsDir, "ProtoTests", "GrpcServiceConfig", "GrpcServiceConfig.json"));
-
+        */
         [Fact]
         public void CommonResource() => ProtoTestSingle(new[] { "CommonResource", "CommonResourceDef" },
             ignoreCsProj: true, ignoreSnippets: true,

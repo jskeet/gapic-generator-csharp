@@ -22,8 +22,6 @@ using Google.Protobuf.Collections;
 using Google.Protobuf.Reflection;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using Grpc.Net.Client.Configuration;
-using Grpc.ServiceConfig;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -523,15 +521,7 @@ namespace Google.Api.Generator.Generation
 
         private (RetrySettings, IEnumerable<StatusCode>, Expiration) LoadTiming(ServiceDetails svc, MethodDescriptor desc)
         {
-            var jsonTiming = SynthesizeMethodTimingFromGrpcServiceConfig();
-            MethodTiming methodSettingsTiming = null; // TODO: ServiceConfigMethodSettings?.Timing
-
-            if (jsonTiming is not null && methodSettingsTiming is not null && !jsonTiming.Equals(methodSettingsTiming))
-            {
-                throw new InvalidOperationException($"Conflicting retry policies for {Descriptor.FullName}");
-            }
-
-            var timing = jsonTiming ?? methodSettingsTiming;
+            MethodTiming timing = null; // ServiceConfigMethodSettings?.Timing;
             if (timing is null)
             {
                 return default;
@@ -548,28 +538,6 @@ namespace Google.Api.Generator.Generation
             var statusCodes = timing.RetryableStatusCodes.Select(x => (StatusCode)x).ToList();
             var expiration = timing.Timeout is null ? null : Expiration.FromTimeout(timing.Timeout.ToTimeSpan());
             return (gaxRetry, statusCodes, expiration);
-
-            MethodTiming SynthesizeMethodTimingFromGrpcServiceConfig()
-            {
-                var methodConfig = svc.MethodGrpcConfigsByName.GetValueOrDefault($"{svc.ServiceFullName}/{desc.Name}") ??
-                    svc.MethodGrpcConfigsByName.GetValueOrDefault($"{svc.ServiceFullName}/");
-                if (methodConfig is null)
-                {
-                    return null;
-                }
-                var retryPolicy = methodConfig.RetryOrHedgingPolicyCase == Grpc.ServiceConfig.MethodConfig.RetryOrHedgingPolicyOneofCase.RetryPolicy
-                    ? methodConfig.RetryPolicy
-                    : null;
-                return new MethodTiming
-                {
-                    Timeout = methodConfig.Timeout,
-                    MaxAttempts = retryPolicy?.MaxAttempts ?? 0,
-                    InitialBackoff = retryPolicy?.InitialBackoff,
-                    MaxBackoff = retryPolicy?.MaxBackoff,
-                    BackoffMultiplier = retryPolicy?.BackoffMultiplier ?? 0f,
-                    RetryableStatusCodes = { retryPolicy?.RetryableStatusCodes ?? Enumerable.Empty<Google.Rpc.Code>() }
-                };
-            }
         }
 
         private IEnumerable<RoutingHeader> ReadRoutingHeaders(RoutingRule routingRule, HttpRule http,

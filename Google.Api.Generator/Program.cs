@@ -32,7 +32,6 @@ namespace Google.Api.Generator
 
     public static class Program
     {
-        private const string nameGrpcServiceConfig = "grpc-service-config";
         private const string nameServiceConfigYaml = "service-config";
         private const string nameCommonResourcesConfig = "common-resources-config";
         private const string nameTransport = "transport";
@@ -40,7 +39,6 @@ namespace Google.Api.Generator
         private const string nameLogFile = "log";
 
         private static IImmutableSet<string> s_validParameters = ImmutableHashSet.Create(
-            nameGrpcServiceConfig,
             nameCommonResourcesConfig,
             nameServiceConfigYaml,
             nameTransport,
@@ -57,9 +55,6 @@ namespace Google.Api.Generator
 
             [Option("output", Required = true, HelpText = "The output directory.")]
             public string Output { get; private set; }
-
-            [Option(nameGrpcServiceConfig, Required = false, HelpText = "Client-side gRPC service config path. JSON proto of type ServiceConfig.")]
-            public string GrpcServiceConfig { get; private set; }
 
             [Option(nameServiceConfigYaml, Required = false, HelpText = "Service config (google.api.Service) YAML path.")]
             public string ServiceConfigYaml { get; private set; }
@@ -189,7 +184,6 @@ namespace Google.Api.Generator
                 var extraParams = ParseExtraParameters(codeGenRequest.Parameter);
                 // Generate code.
                 // On success, send all generated files back to protoc.
-                var grpcServiceConfigPath = extraParams.GetValueOrDefault(nameGrpcServiceConfig)?.SingleOrDefault();
                 var serviceConfigPath = extraParams.GetValueOrDefault(nameServiceConfigYaml)?.SingleOrDefault();
                 var commonResourcesConfigPaths = extraParams.GetValueOrDefault(nameCommonResourcesConfig);
                 var transports = ParseTransports(extraParams.GetValueOrDefault(nameTransport)?.SingleOrDefault());
@@ -199,7 +193,7 @@ namespace Google.Api.Generator
                 Logging.ConfigureForFile(logFile);
 
                 var results = CodeGenerator.Generate(codeGenRequest.ProtoFile, codeGenRequest.FileToGenerate,
-                    SystemClock.Instance, grpcServiceConfigPath, serviceConfigPath, commonResourcesConfigPaths, transports,
+                    SystemClock.Instance, serviceConfigPath, commonResourcesConfigPaths, transports,
                     requestNumericEnumJsonEncoding);
 
                 codeGenResponse = new CodeGeneratorResponse
@@ -264,7 +258,7 @@ namespace Google.Api.Generator
                 var fileDescriptorSet = FileDescriptorSet.Parser.ParseFrom(descriptorBytes);
                 var transports = ParseTransports(options.Transport);
                 var files = CodeGenerator.Generate(fileDescriptorSet, options.Package, SystemClock.Instance,
-                    options.GrpcServiceConfig, options.ServiceConfigYaml, options.CommonResourcesConfigs,
+                    options.ServiceConfigYaml, options.CommonResourcesConfigs,
                     transports, options.RequestNumericEnumJsonEncoding);
                 foreach (var file in files)
                 {

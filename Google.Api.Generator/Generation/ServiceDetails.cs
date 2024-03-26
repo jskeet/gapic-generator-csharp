@@ -19,7 +19,6 @@ using Google.Cloud;
 using Google.Cloud.Iam.V1;
 using Google.Cloud.Location;
 using Google.Protobuf.Reflection;
-using Grpc.ServiceConfig;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -41,7 +40,7 @@ namespace Google.Api.Generator.Generation
             new MixinDetails(Locations.Descriptor, typeof(LocationsClient), typeof(LocationsClientImpl), typeof(Locations.LocationsClient), typeof(LocationsSettings)),
         }.ToDictionary(details => details.ProtobufServiceDescriptor.FullName);
 
-        public ServiceDetails(ProtoCatalog catalog, string ns, ServiceDescriptor desc, ServiceConfig grpcServiceConfig, Service serviceConfig, ApiTransports transports, ClientLibrarySettings librarySettings)
+        public ServiceDetails(ProtoCatalog catalog, string ns, ServiceDescriptor desc, Service serviceConfig, ApiTransports transports, ClientLibrarySettings librarySettings)
         {
             ServiceConfig = serviceConfig;
             LibrarySettings = librarySettings;
@@ -59,12 +58,6 @@ namespace Google.Api.Generator.Generation
             // user code. Imports are cleaner, with less type name clashes, etc. which in turn means less
             // namespace aliasing.
             SnippetsNamespace = "GoogleCSharpSnippets";
-            // Must come early; used by `MethodDetails.Create()`
-            MethodGrpcConfigsByName = grpcServiceConfig?.MethodConfig
-                .SelectMany(conf => conf.Name.Select(name => (name, conf)))
-                .Where(x => x.name.Service == desc.FullName)
-                .ToImmutableDictionary(x => $"{x.name.Service}/{x.name.Method}", x => x.conf) ??
-                ImmutableDictionary<string, MethodConfig>.Empty;
             ServiceFullName = desc.FullName;
 
             // The library settings allow services to be renamed.
@@ -189,9 +182,6 @@ namespace Google.Api.Generator.Generation
 
         /// <summary>The name of the variable to hold the client instance.</summary>
         public string SnippetsClientName { get; }
-
-        /// <summary>Grpc Service-Config Method configs, includes both service-level and method-level.</summary>
-        public IReadOnlyDictionary<string, MethodConfig> MethodGrpcConfigsByName { get; }
 
         /// <summary>Name of the proto package for this service</summary>
         public string ProtoPackage { get; }
