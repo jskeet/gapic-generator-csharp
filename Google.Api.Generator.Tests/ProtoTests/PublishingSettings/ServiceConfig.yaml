@@ -49,5 +49,4 @@ publishing:
         selective_gapic_generation:
           methods:
             - "testing.publishingsettings.ServiceWithSelectiveGeneration.SelectiveMethod"
-          generate_hidden_as_internal: true
   - version: testing.publishingsettings.wrong2

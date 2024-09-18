@@ -47,7 +47,6 @@ namespace Testing.PublishingSettings
         {
             gax::GaxPreconditions.CheckNotNull(existing, nameof(existing));
             PublicMethodSettings = existing.PublicMethodSettings;
-            SelectiveMethodSettings = existing.SelectiveMethodSettings;
             OnCopy(existing);
         }
 
@@ -65,19 +64,6 @@ namespace Testing.PublishingSettings
         /// </list>
         /// </remarks>
         public gaxgrpc::CallSettings PublicMethodSettings { get; set; } = gaxgrpc::CallSettings.FromExpiration(gax::Expiration.None);
-
-        /// <summary>
-        /// <see cref="gaxgrpc::CallSettings"/> for synchronous and asynchronous calls to
-        /// <c>ServiceWithSelectiveGenerationClient.SelectiveMethod</c> and
-        /// <c>ServiceWithSelectiveGenerationClient.SelectiveMethodAsync</c>.
-        /// </summary>
-        /// <remarks>
-        /// <list type="bullet">
-        /// <item><description>This call will not be retried.</description></item>
-        /// <item><description>No timeout is applied.</description></item>
-        /// </list>
-        /// </remarks>
-        internal gaxgrpc::CallSettings SelectiveMethodSettings { get; set; } = gaxgrpc::CallSettings.FromExpiration(gax::Expiration.None);
 
         /// <summary>Creates a deep clone of this object, with all the same property values.</summary>
         /// <returns>A deep clone of this <see cref="ServiceWithSelectiveGenerationSettings"/> object.</returns>
@@ -244,33 +230,6 @@ namespace Testing.PublishingSettings
         /// <returns>A Task containing the RPC response.</returns>
         public virtual stt::Task<Response> PublicMethodAsync(Request request, st::CancellationToken cancellationToken) =>
             PublicMethodAsync(request, gaxgrpc::CallSettings.FromCancellationToken(cancellationToken));
-
-        /// <summary>
-        /// Selectively-generated RPC.
-        /// </summary>
-        /// <param name="request">The request object containing all of the parameters for the API call.</param>
-        /// <param name="callSettings">If not null, applies overrides to this RPC call.</param>
-        /// <returns>The RPC response.</returns>
-        internal virtual Response SelectiveMethod(Request request, gaxgrpc::CallSettings callSettings = null) =>
-            throw new sys::NotImplementedException();
-
-        /// <summary>
-        /// Selectively-generated RPC.
-        /// </summary>
-        /// <param name="request">The request object containing all of the parameters for the API call.</param>
-        /// <param name="callSettings">If not null, applies overrides to this RPC call.</param>
-        /// <returns>A Task containing the RPC response.</returns>
-        internal virtual stt::Task<Response> SelectiveMethodAsync(Request request, gaxgrpc::CallSettings callSettings = null) =>
-            throw new sys::NotImplementedException();
-
-        /// <summary>
-        /// Selectively-generated RPC.
-        /// </summary>
-        /// <param name="request">The request object containing all of the parameters for the API call.</param>
-        /// <param name="cancellationToken">A <see cref="st::CancellationToken"/> to use for this RPC.</param>
-        /// <returns>A Task containing the RPC response.</returns>
-        internal virtual stt::Task<Response> SelectiveMethodAsync(Request request, st::CancellationToken cancellationToken) =>
-            SelectiveMethodAsync(request, gaxgrpc::CallSettings.FromCancellationToken(cancellationToken));
     }
 
     /// <summary>ServiceWithSelectiveGeneration client wrapper implementation, for convenient use.</summary>
@@ -282,8 +241,6 @@ namespace Testing.PublishingSettings
     public sealed partial class ServiceWithSelectiveGenerationClientImpl : ServiceWithSelectiveGenerationClient
     {
         private readonly gaxgrpc::ApiCall<Request, Response> _callPublicMethod;
-
-        private readonly gaxgrpc::ApiCall<Request, Response> _callSelectiveMethod;
 
         /// <summary>
         /// Constructs a client wrapper for the ServiceWithSelectiveGeneration service, with the specified gRPC client
@@ -306,17 +263,12 @@ namespace Testing.PublishingSettings
             _callPublicMethod = clientHelper.BuildApiCall<Request, Response>("PublicMethod", grpcClient.PublicMethodAsync, grpcClient.PublicMethod, effectiveSettings.PublicMethodSettings);
             Modify_ApiCall(ref _callPublicMethod);
             Modify_PublicMethodApiCall(ref _callPublicMethod);
-            _callSelectiveMethod = clientHelper.BuildApiCall<Request, Response>("SelectiveMethod", grpcClient.SelectiveMethodAsync, grpcClient.SelectiveMethod, effectiveSettings.SelectiveMethodSettings);
-            Modify_ApiCall(ref _callSelectiveMethod);
-            Modify_SelectiveMethodApiCall(ref _callSelectiveMethod);
             OnConstruction(grpcClient, effectiveSettings, clientHelper);
         }
 
         partial void Modify_ApiCall<TRequest, TResponse>(ref gaxgrpc::ApiCall<TRequest, TResponse> call) where TRequest : class, proto::IMessage<TRequest> where TResponse : class, proto::IMessage<TResponse>;
 
         partial void Modify_PublicMethodApiCall(ref gaxgrpc::ApiCall<Request, Response> call);
-
-        partial void Modify_SelectiveMethodApiCall(ref gaxgrpc::ApiCall<Request, Response> call);
 
         partial void OnConstruction(ServiceWithSelectiveGeneration.ServiceWithSelectiveGenerationClient grpcClient, ServiceWithSelectiveGenerationSettings effectiveSettings, gaxgrpc::ClientHelper clientHelper);
 
@@ -347,30 +299,6 @@ namespace Testing.PublishingSettings
         {
             Modify_Request(ref request, ref callSettings);
             return _callPublicMethod.Async(request, callSettings);
-        }
-
-        /// <summary>
-        /// Selectively-generated RPC.
-        /// </summary>
-        /// <param name="request">The request object containing all of the parameters for the API call.</param>
-        /// <param name="callSettings">If not null, applies overrides to this RPC call.</param>
-        /// <returns>The RPC response.</returns>
-        internal override Response SelectiveMethod(Request request, gaxgrpc::CallSettings callSettings = null)
-        {
-            Modify_Request(ref request, ref callSettings);
-            return _callSelectiveMethod.Sync(request, callSettings);
-        }
-
-        /// <summary>
-        /// Selectively-generated RPC.
-        /// </summary>
-        /// <param name="request">The request object containing all of the parameters for the API call.</param>
-        /// <param name="callSettings">If not null, applies overrides to this RPC call.</param>
-        /// <returns>A Task containing the RPC response.</returns>
-        internal override stt::Task<Response> SelectiveMethodAsync(Request request, gaxgrpc::CallSettings callSettings = null)
-        {
-            Modify_Request(ref request, ref callSettings);
-            return _callSelectiveMethod.Async(request, callSettings);
         }
     }
 }
