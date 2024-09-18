@@ -47,6 +47,7 @@ namespace Google.Api.Generator.Tests
             ProtobufDir = Path.Combine(RootDir, "tools", "protos");
             var now = DateTime.UtcNow;
             ActualGeneratedFilesDir = Path.Combine(Path.GetTempPath(), $"GeneratorTests-{now:yyyyMMddHHmmssZ}");
+            Directory.CreateDirectory(ActualGeneratedFilesDir);
         }
 
         /// <summary>Root path; where the .sln file is.</summary>

@@ -95,6 +95,8 @@ namespace Google.Api.Generator.Tests
             // Or include `// TEST_DISABLE` to disable testing of the entire file.
             sourceDir = sourceDir ?? testProtoNames.First();
             outputDir = outputDir ?? sourceDir;
+            Utils.Logging.ConfigureForFile(Path.Combine(Invoker.ActualGeneratedFilesDir, $"log-{outputDir}.txt"));
+
             var protoPaths = testProtoNames.Select(x => Path.Combine("ProtoTests", sourceDir, $"{x}.proto"));
             package = package ?? $"testing.{sourceDir.ToLowerInvariant()}";
 
@@ -165,6 +167,7 @@ namespace Google.Api.Generator.Tests
             where TException : Exception
         {
             string sourceDir = testProtoNames.First();
+            Utils.Logging.ConfigureForFile(Path.Combine(Invoker.ActualGeneratedFilesDir, $"log-{sourceDir}.txt"));
             var protoPaths = testProtoNames.Select(x => Path.Combine("ProtoTests", sourceDir, $"{x}.proto"));
             string package = $"testing.{sourceDir.ToLowerInvariant()}";
 
