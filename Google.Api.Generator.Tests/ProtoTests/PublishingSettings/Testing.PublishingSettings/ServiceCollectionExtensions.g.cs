@@ -206,5 +206,41 @@ namespace Microsoft.Extensions.DependencyInjection
                 action?.Invoke(provider, builder);
                 return builder.Build(provider);
             });
+
+        /// <summary>
+        /// Adds a singleton <see cref="tp::ServiceWithSelectiveGenerationClient"/> to <paramref name="services"/>.
+        /// </summary>
+        /// <param name="services">
+        /// The service collection to add the client to. The services are used to configure the client when requested.
+        /// </param>
+        /// <param name="action">
+        /// An optional action to invoke on the client builder. This is invoked before services from
+        /// <paramref name="services"/> are used.
+        /// </param>
+        public static IServiceCollection AddServiceWithSelectiveGenerationClient(this IServiceCollection services, sys::Action<tp::ServiceWithSelectiveGenerationClientBuilder> action = null) =>
+            services.AddSingleton(provider =>
+            {
+                tp::ServiceWithSelectiveGenerationClientBuilder builder = new tp::ServiceWithSelectiveGenerationClientBuilder();
+                action?.Invoke(builder);
+                return builder.Build(provider);
+            });
+
+        /// <summary>
+        /// Adds a singleton <see cref="tp::ServiceWithSelectiveGenerationClient"/> to <paramref name="services"/>.
+        /// </summary>
+        /// <param name="services">
+        /// The service collection to add the client to. The services are used to configure the client when requested.
+        /// </param>
+        /// <param name="action">
+        /// An optional action to invoke on the client builder. This is invoked before services from
+        /// <paramref name="services"/> are used.
+        /// </param>
+        public static IServiceCollection AddServiceWithSelectiveGenerationClient(this IServiceCollection services, sys::Action<sys::IServiceProvider, tp::ServiceWithSelectiveGenerationClientBuilder> action) =>
+            services.AddSingleton(provider =>
+            {
+                tp::ServiceWithSelectiveGenerationClientBuilder builder = new tp::ServiceWithSelectiveGenerationClientBuilder();
+                action?.Invoke(provider, builder);
+                return builder.Build(provider);
+            });
     }
 }

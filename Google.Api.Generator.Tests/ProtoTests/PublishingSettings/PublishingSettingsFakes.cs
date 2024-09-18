@@ -125,6 +125,22 @@ public class ServiceWithApiVersion
     }
 }
 
+public class ServiceWithSelectiveGeneration
+{
+    public static ServiceDescriptor Descriptor => null;
+
+    // Fake gRPC client
+    public class ServiceWithSelectiveGenerationClient
+    {
+        public ServiceWithSelectiveGenerationClient() { }
+        public ServiceWithSelectiveGenerationClient(CallInvoker callInvoker) { }
+        public virtual AsyncUnaryCall<Response> PublicMethodAsync(Request request, CallOptions options) => throw new NotImplementedException();
+        public virtual Response PublicMethod(Request request, CallOptions options) => throw new NotImplementedException();
+        public virtual AsyncUnaryCall<Response> SelectiveMethodAsync(Request request, CallOptions options) => throw new NotImplementedException();
+        public virtual Response SelectiveMethod(Request request, CallOptions options) => throw new NotImplementedException();
+    }
+}
+
 public partial class Request : ProtoMsgFake<Request>
 {
     public string String1 { get; set; }

@@ -72,6 +72,17 @@ service ServiceWithApiVersion {
   rpc AMethod(Request) returns(Response);
 }
 
+// This is a service with one normal method and one method which is generated selectively.
+// Prototype testing: two different commits, one with this hidden and one with it internal.
+// Our config doesn't allow a mixture of hidden and internal in the same protobuf package.
+service ServiceWithSelectiveGeneration {
+  // Public RPC.
+  rpc PublicMethod(Request) returns(Response);
+
+  // Selectively-generated RPC.
+  rpc SelectiveMethod(Request) returns(Response);
+}
+
 message Request {
   string string_1 = 1;
   string string_2 = 2;
