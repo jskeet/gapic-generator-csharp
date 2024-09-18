@@ -77,7 +77,7 @@ namespace Testing.PublishingSettings
         /// <item><description>No timeout is applied.</description></item>
         /// </list>
         /// </remarks>
-        public gaxgrpc::CallSettings SelectiveMethodSettings { get; set; } = gaxgrpc::CallSettings.FromExpiration(gax::Expiration.None);
+        internal gaxgrpc::CallSettings SelectiveMethodSettings { get; set; } = gaxgrpc::CallSettings.FromExpiration(gax::Expiration.None);
 
         /// <summary>Creates a deep clone of this object, with all the same property values.</summary>
         /// <returns>A deep clone of this <see cref="ServiceWithSelectiveGenerationSettings"/> object.</returns>
@@ -251,7 +251,7 @@ namespace Testing.PublishingSettings
         /// <param name="request">The request object containing all of the parameters for the API call.</param>
         /// <param name="callSettings">If not null, applies overrides to this RPC call.</param>
         /// <returns>The RPC response.</returns>
-        public virtual Response SelectiveMethod(Request request, gaxgrpc::CallSettings callSettings = null) =>
+        internal virtual Response SelectiveMethod(Request request, gaxgrpc::CallSettings callSettings = null) =>
             throw new sys::NotImplementedException();
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace Testing.PublishingSettings
         /// <param name="request">The request object containing all of the parameters for the API call.</param>
         /// <param name="callSettings">If not null, applies overrides to this RPC call.</param>
         /// <returns>A Task containing the RPC response.</returns>
-        public virtual stt::Task<Response> SelectiveMethodAsync(Request request, gaxgrpc::CallSettings callSettings = null) =>
+        internal virtual stt::Task<Response> SelectiveMethodAsync(Request request, gaxgrpc::CallSettings callSettings = null) =>
             throw new sys::NotImplementedException();
 
         /// <summary>
@@ -269,7 +269,7 @@ namespace Testing.PublishingSettings
         /// <param name="request">The request object containing all of the parameters for the API call.</param>
         /// <param name="cancellationToken">A <see cref="st::CancellationToken"/> to use for this RPC.</param>
         /// <returns>A Task containing the RPC response.</returns>
-        public virtual stt::Task<Response> SelectiveMethodAsync(Request request, st::CancellationToken cancellationToken) =>
+        internal virtual stt::Task<Response> SelectiveMethodAsync(Request request, st::CancellationToken cancellationToken) =>
             SelectiveMethodAsync(request, gaxgrpc::CallSettings.FromCancellationToken(cancellationToken));
     }
 
@@ -355,7 +355,7 @@ namespace Testing.PublishingSettings
         /// <param name="request">The request object containing all of the parameters for the API call.</param>
         /// <param name="callSettings">If not null, applies overrides to this RPC call.</param>
         /// <returns>The RPC response.</returns>
-        public override Response SelectiveMethod(Request request, gaxgrpc::CallSettings callSettings = null)
+        internal override Response SelectiveMethod(Request request, gaxgrpc::CallSettings callSettings = null)
         {
             Modify_Request(ref request, ref callSettings);
             return _callSelectiveMethod.Sync(request, callSettings);
@@ -367,7 +367,7 @@ namespace Testing.PublishingSettings
         /// <param name="request">The request object containing all of the parameters for the API call.</param>
         /// <param name="callSettings">If not null, applies overrides to this RPC call.</param>
         /// <returns>A Task containing the RPC response.</returns>
-        public override stt::Task<Response> SelectiveMethodAsync(Request request, gaxgrpc::CallSettings callSettings = null)
+        internal override stt::Task<Response> SelectiveMethodAsync(Request request, gaxgrpc::CallSettings callSettings = null)
         {
             Modify_Request(ref request, ref callSettings);
             return _callSelectiveMethod.Async(request, callSettings);

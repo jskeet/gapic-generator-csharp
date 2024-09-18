@@ -45,4 +45,9 @@ publishing:
       - "ServiceWithHandwrittenSignatures.AMethod(string_1)"
       renamed_services:
         OriginalServiceName: RenamedServiceName
+      common:
+        selective_gapic_generation:
+          methods:
+            - "testing.publishingsettings.ServiceWithSelectiveGeneration.SelectiveMethod"
+          generate_hidden_as_internal: true
   - version: testing.publishingsettings.wrong2

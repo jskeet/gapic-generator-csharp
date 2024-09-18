@@ -60,44 +60,5 @@ namespace GoogleCSharpSnippets
             Response response = await serviceWithSelectiveGenerationClient.PublicMethodAsync(request);
             // End snippet
         }
-
-        /// <summary>Snippet for SelectiveMethod</summary>
-        public void SelectiveMethodRequestObject()
-        {
-            // Snippet: SelectiveMethod(Request, CallSettings)
-            // Create client
-            ServiceWithSelectiveGenerationClient serviceWithSelectiveGenerationClient = ServiceWithSelectiveGenerationClient.Create();
-            // Initialize request argument(s)
-            Request request = new Request
-            {
-                String1 = "",
-                String2 = "",
-                RequestId = "",
-                RequestIdWithPresence = "",
-            };
-            // Make the request
-            Response response = serviceWithSelectiveGenerationClient.SelectiveMethod(request);
-            // End snippet
-        }
-
-        /// <summary>Snippet for SelectiveMethodAsync</summary>
-        public async Task SelectiveMethodRequestObjectAsync()
-        {
-            // Snippet: SelectiveMethodAsync(Request, CallSettings)
-            // Additional: SelectiveMethodAsync(Request, CancellationToken)
-            // Create client
-            ServiceWithSelectiveGenerationClient serviceWithSelectiveGenerationClient = await ServiceWithSelectiveGenerationClient.CreateAsync();
-            // Initialize request argument(s)
-            Request request = new Request
-            {
-                String1 = "",
-                String2 = "",
-                RequestId = "",
-                RequestIdWithPresence = "",
-            };
-            // Make the request
-            Response response = await serviceWithSelectiveGenerationClient.SelectiveMethodAsync(request);
-            // End snippet
-        }
     }
 }
