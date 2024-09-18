@@ -16,6 +16,7 @@ using Google.Api.Gax;
 using Google.Api.Gax.Grpc;
 using Google.Api.Generator.ProtoUtils;
 using Google.Api.Generator.Utils;
+using Google.Api.Generator.Utils.Roslyn;
 using Google.Cloud;
 using Google.LongRunning;
 using Google.Protobuf.Reflection;
@@ -517,6 +518,23 @@ namespace Google.Api.Generator.Generation
             IsDeprecated = desc.IsDeprecated() || RequestMessageDesc.IsDeprecated() || ResponseMessageDesc.IsDeprecated();
             ServiceConfigMethodSettings = svc.ServiceConfig?.Publishing?.MethodSettings?.FirstOrDefault(m => m.Selector == desc.FullName)
                 ?? new MethodSettings();
+            Visibility = ComputeVisibility(svc.LibrarySettings, desc.FullName);
+        }
+
+        private static MethodVisibility ComputeVisibility(ClientLibrarySettings settings, string fullName)
+        {
+            var selectiveGeneration = settings?.DotnetSettings?.Common?.SelectiveGapicGeneration;
+            if (selectiveGeneration is null)
+            {
+                return MethodVisibility.Public;
+            }
+            if (!selectiveGeneration.Methods.Contains(fullName))
+            {
+                return MethodVisibility.Public;
+            }
+            var visibility = selectiveGeneration.GenerateHiddenAsInternal ? MethodVisibility.Internal : MethodVisibility.Hidden;
+            Utils.Logging.LogInformation("Generating method '{name}' with visibility '{visibility}'", fullName, visibility);
+            return visibility;
         }
 
         private (RetrySettings, IEnumerable<StatusCode>, Expiration) LoadTiming(ServiceDetails svc, MethodDescriptor desc)
@@ -678,6 +696,9 @@ namespace Google.Api.Generator.Generation
             }
         }
 
+        public MethodVisibility Visibility { get; }
+        public Modifier DeclarationModifier => Visibility == MethodVisibility.Internal? Modifier.Internal : Modifier.Public;
+
         /// <summary>
         /// The protobuf method descriptor for this method.
         /// </summary>
@@ -766,5 +787,12 @@ namespace Google.Api.Generator.Generation
         /// This is never null.
         /// </summary>
         public MethodSettings ServiceConfigMethodSettings { get; }
+    }
+
+    public enum MethodVisibility
+    {
+        Public = 0,
+        Internal = 1,
+        Hidden = 2
     }
 }

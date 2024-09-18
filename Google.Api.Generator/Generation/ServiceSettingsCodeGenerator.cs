@@ -187,7 +187,7 @@ namespace Google.Api.Generator.Generation
                         "This call will not be retried.",
                         timeoutRemark));
                 }
-                var property = AutoProperty(Public, _ctx.Type<CallSettings>(), method.SettingsName, hasSetter: true)
+                var property = AutoProperty(method.DeclarationModifier, _ctx.Type<CallSettings>(), method.SettingsName, hasSetter: true)
                     .WithInitializer(initializer)
                     .WithXmlDoc(xmlSummary, xmlRemarks);
                 yield return property;
@@ -217,7 +217,7 @@ namespace Google.Api.Generator.Generation
         }
 
         private PropertyDeclarationSyntax LroSettingsProperty(MethodDetails.Lro method) =>
-            AutoProperty(Public, _ctx.Type<OperationsSettings>(), method.LroSettingsName, hasSetter: true)
+            AutoProperty(method.DeclarationModifier, _ctx.Type<OperationsSettings>(), method.LroSettingsName, hasSetter: true)
                 .WithInitializer(New(_ctx.Type<OperationsSettings>())().WithInitializer(
                     new ObjectInitExpr(nameof(OperationsSettings.DefaultPollSettings), New(_ctx.Type<PollSettings>())(
                         _ctx.Type<Expiration>().Call(nameof(Expiration.FromTimeout))(_ctx.Type<TimeSpan>().Call(nameof(TimeSpan.FromHours))((int) s_lroDefaultPollSettings.Expiration.Timeout.Value.TotalHours)),
@@ -236,7 +236,7 @@ namespace Google.Api.Generator.Generation
                 .WithAdditionalAnnotations(s_cloneSetting);
 
         private PropertyDeclarationSyntax BidiSettingsProperty(MethodDetails.BidiStreaming method) =>
-            AutoProperty(Public, _ctx.Type<BidirectionalStreamingSettings>(), method.StreamingSettingsName, hasSetter: true)
+            AutoProperty(method.DeclarationModifier, _ctx.Type<BidirectionalStreamingSettings>(), method.StreamingSettingsName, hasSetter: true)
                 .WithInitializer(New(_ctx.Type<BidirectionalStreamingSettings>())(100))
                 .WithXmlDoc(
                     XmlDoc.Summary(_ctx.Type<BidirectionalStreamingSettings>(), " for calls to ",
@@ -245,7 +245,7 @@ namespace Google.Api.Generator.Generation
                     XmlDoc.Remarks("The default local send queue size is 100."));
 
         private PropertyDeclarationSyntax ClientSettingsProperty(MethodDetails.ClientStreaming method) =>
-            AutoProperty(Public, _ctx.Type<ClientStreamingSettings>(), method.StreamingSettingsName, hasSetter: true)
+            AutoProperty(method.DeclarationModifier, _ctx.Type<ClientStreamingSettings>(), method.StreamingSettingsName, hasSetter: true)
                 .WithInitializer(New(_ctx.Type<ClientStreamingSettings>())(100))
                 .WithXmlDoc(
                     XmlDoc.Summary(_ctx.Type<ClientStreamingSettings>(), " for calls to ",

@@ -83,7 +83,7 @@ namespace Google.Api.Generator.Generation
 
         private static IEnumerable<SnippetDef> Snippets(SourceFileContext ctx, ServiceDetails svc)
         {
-            foreach (var method in svc.Methods)
+            foreach (var method in svc.Methods.Where(m => m.Visibility == MethodVisibility.Public))
             {
                 var methodDef = new MethodDef(ctx, svc, method);
                 switch (method)

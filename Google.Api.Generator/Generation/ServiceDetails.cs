@@ -94,7 +94,7 @@ namespace Google.Api.Generator.Generation
             DefaultPort = 443; // Hardcoded; this is not specifiable by proto annotation.
             var oauthScopes = desc.GetExtension(ClientExtensions.OauthScopes);
             DefaultScopes = string.IsNullOrEmpty(oauthScopes) ? Enumerable.Empty<string>() : oauthScopes.Split(',', ' ');
-            Methods = desc.Methods.Select(x => MethodDetails.Create(this, x)).ToList();
+            Methods = desc.Methods.Select(x => MethodDetails.Create(this, x)).Where(m => m.Visibility != MethodVisibility.Hidden).ToList();
             ServiceSnippetsTyp = Typ.Manual(SnippetsNamespace, $"AllGenerated{ServiceName}ClientSnippets");
             SnippetsTyp = Typ.Manual(SnippetsNamespace, $"Generated{ServiceName}ClientSnippets");
             SnippetsClientName = $"{ServiceName.ToLowerCamelCase()}Client";
